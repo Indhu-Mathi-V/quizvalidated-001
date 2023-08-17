@@ -7,6 +7,7 @@ import {AiOutlineFieldTime} from 'react-icons/ai';
 import {useDispatch,useSelector} from 'react-redux'
 import {increment,decrement,showResults,viewRes,quizScore,} from './redux-toolkit/reducer';
 import {userAnswer} from './redux-toolkit/answerSlice';
+import sendDataToBackend from './api';
 
 const Quiz1 = () => {
 
@@ -40,13 +41,22 @@ useEffect(() => {
     .catch(error => console.error('Error fetching data:', error));
 }, []);
 
-  const [userData, setUserData] = useState(questionsData.map((question) => ({ ...question, isSelected: 'not selected' })));
+  const [userData, setUserData] = useState([]);
+  useEffect(() =>{
+    setUserData( questionsData?.map((question) => ({ ...question, isSelected: 'not selected' }))
+   )
+  }, [questionsData])
+  
   const [timeRemaining, setTimeRemaining] = useState(300); // 5 minutes in seconds
   
   const handleOptionChange = (event) => {
+    // event.preventDefault();
+    // console.log(questionsData);
+    console.log(userData);
     const updatedUserData = [...userData];
     updatedUserData[currentQuestion].isSelected = event.target.value;
     setUserData(updatedUserData);
+    console.log("handleoption change");
   };
 
 
@@ -65,8 +75,7 @@ useEffect(() => {
         score++;
       }
     });
-    dispatch(quizScore(score));
-    
+    dispatch(quizScore(score));    
   };
 
   useEffect(() => {
@@ -89,6 +98,17 @@ useEffect(() => {
   let minutes = Math.floor(divisor_for_minutes / 60);
   let divisor_for_seconds = divisor_for_minutes % 60;
   let seconds = Math.ceil(divisor_for_seconds);
+
+  const handleSendData = async () => {
+    try {
+      const response = await sendDataToBackend(userData);
+      console.log('Data sent successfully:', response);
+    } catch (error) {
+      console.error('Error sending data:', error);
+    }
+  };
+
+
 
   return (
 
@@ -126,7 +146,7 @@ useEffect(() => {
 
           {currentQuestion > 0 && <div type="button" onClick={() => dispatch(decrement())} className='prev'>Previous</div>}
           {currentQuestion < questionsData.length - 1 && <div type="button" onClick={() => dispatch(increment())} className='next'>Next</div>}
-          {currentQuestion === questionsData.length - 1 && <div type="submit" className='submit' onClick={() => {dispatch(userAnswer(userData));handleSubmit();}}>Submit</div>}
+          {currentQuestion === questionsData.length - 1 && <div type="submit" className='submit' onClick={() => {dispatch(userAnswer(userData));handleSubmit(); handleSendData();}}>Submit</div>}
             </div>
           </div>
           
