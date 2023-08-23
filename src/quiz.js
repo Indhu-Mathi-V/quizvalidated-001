@@ -12,6 +12,7 @@ import sendDataToBackend from './api';
 const Quiz1 = () => {
 
   const[questionsData , setQuestionsData]  = useState([])
+  const [score, setScore] = useState(null);
   // const questionsData = useSelector((state) => state.question.questionsData);
   const currentQuestion = useSelector((state) => state.question.count);
   const show = useSelector((state) => state.question.showResults);
@@ -33,6 +34,11 @@ const Quiz1 = () => {
 
 
 
+const userResponses = [
+  // User's responses here
+];
+
+
 useEffect(() => {
   // Fetch data from the backend API
   fetch('http://localhost:8000/api/questionsData')
@@ -40,6 +46,9 @@ useEffect(() => {
     .then(data => setQuestionsData(data))
     .catch(error => console.error('Error fetching data:', error));
 }, []);
+
+
+
 
   const [userData, setUserData] = useState([]);
   useEffect(() =>{
@@ -64,19 +73,19 @@ useEffect(() => {
     if (event) {
       event.preventDefault();
     }
-    calculateScore();
+    // calculateScore();
     dispatch(showResults());
   };
 
-  const calculateScore = () => {
-    let score = 0;
-    userData.forEach((question) => {
-      if (question.isSelected === question.answer) {
-        score++;
-      }
-    });
-    dispatch(quizScore(score));    
-  };
+  // const calculateScore = () => {
+  //   let score = 0;
+  //   userData.forEach((question) => {
+  //     if (question.isSelected === question.answer) {
+  //       score++;
+  //     }
+  //   });
+  //   dispatch(quizScore(score));    
+  // };
 
   useEffect(() => {
     let interval;
@@ -108,7 +117,25 @@ useEffect(() => {
     }
   };
 
-
+  const validate = () => {
+    fetch('http://localhost:8000/api/useranswer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userData })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Received data:', data);
+      const receivedScore = data.score;
+      console.log('Received score:', receivedScore);
+      setScore(receivedScore); // Update the score state with the received score
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+  };
 
   return (
 
@@ -146,7 +173,7 @@ useEffect(() => {
 
           {currentQuestion > 0 && <div type="button" onClick={() => dispatch(decrement())} className='prev'>Previous</div>}
           {currentQuestion < questionsData.length - 1 && <div type="button" onClick={() => dispatch(increment())} className='next'>Next</div>}
-          {currentQuestion === questionsData.length - 1 && <div type="submit" className='submit' onClick={() => {dispatch(userAnswer(userData));handleSubmit(); handleSendData();}}>Submit</div>}
+          {currentQuestion === questionsData.length - 1 && <div type="submit" className='submit' onClick={() => {dispatch(userAnswer(userData));handleSubmit(); handleSendData();validate();}}>Submit</div>}
             </div>
           </div>
           
@@ -157,7 +184,7 @@ useEffect(() => {
           <div className='score-container'>
 
           <h1>Congratuluations you completed your test</h1>
-          <h3 className='score'>You Scored: {Score} Out of {questionsData.length} questions</h3>
+          <h3 className='score'>You Scored: {score} Out of {questionsData.length} questions</h3>
           <div className='btn-container'>
             <div className='btn'>
               <div onClick={() => dispatch(viewRes())} className='show'>SHOW RESLUT</div>

@@ -35,19 +35,19 @@ app.get('/api/questionsData', (req, res) => {
           id: 1,
           question: 'What is the capital of France?',
           options: ['London', 'Paris', 'Rome'],
-          answer: 'Paris',
+         
         },
         {
           id: 2,
           question: 'Which planet is known as the Red Planet?',
           options: ['Venus', 'Mars', 'Jupiter'],
-          answer: 'Mars',
+         
         },
         {
           id: 3,
           question: 'Which is the largest ocean in the world?',
           options: ['Indian Ocean', 'Pacific Ocean', 'Atlantic Ocean'],
-          answer: 'Pacific Ocean'
+        
         }
       ]
     res.json(questionsData);
@@ -55,11 +55,33 @@ app.get('/api/questionsData', (req, res) => {
 });
 
 app.post('/api/useranswer', (req, res) => {
-  const dataArray = req.body.data; // Assuming the array is sent as { data: [...array] }
+  const userResponses = req.body; // Assuming the array is sent as { data: [...array] }
   // Process the array data here
 
   // Send a response back to the frontend
-  res.status(200).json({ message: 'Data received and processed successfully' });
+
+console.log('these are selected by users',userResponses);
+
+  res.status(200).json({userResponses});
+
+  // res.status(200).json({userResponses})
+
+
+  
+  let score = 0;
+
+  for (const userResponse of userResponses) {
+      const matchingQuestion = answers.find(
+          question => question.id === userResponse.id
+      );
+
+      if (matchingQuestion && userResponse.isselected === matchingQuestion.answer) {
+          score++;
+      }
+  }
+
+  res.status(200).json({ score });
+
 
   // dataArray.forEach((question) => {
   //   if (question.isSelected === question.answer) {
@@ -68,6 +90,8 @@ app.post('/api/useranswer', (req, res) => {
   // });
 
 });
+
+
 
 app.listen(8000, () => {
   console.log(`Server is running on port 8000.`);
