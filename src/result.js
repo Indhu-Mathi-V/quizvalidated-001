@@ -2,16 +2,29 @@
 import './result.scss';
 import {useSelector,useDispatch} from 'react-redux';
 import {inc, dec, finish,buttonVisible} from './redux-toolkit/answerSlice';
+import { useState, useEffect } from 'react';
 
 // create a Result component
-const Result =  () =>{
+const Result =  ({userData}) =>{
   
   
    const currentQuestion = useSelector((state) => state.answers.count);
-   const userAnswer = useSelector((state) => state.answers.userAnswer);
+  //  const userAnswer = useSelector((state) => state.answers.userAnswer);
+const [questionAnswer, setQuestionAnswer] = useState([])
+  const userAnswer = userData
+
+  // console.log(userAnswer);
    const quit = useSelector((state) => state.answers.finish);
    const button = useSelector((state) => state.answers.buttonVisible);
    const dispatch = useDispatch();
+
+   useEffect(() => {
+    // Fetch data from the backend API
+    fetch('http://localhost:8000/api/answerData')
+      .then(response => response.json())
+      .then(data => setQuestionAnswer(data))
+      .catch(error => console.error('Error fetching data:', error));
+  }, []);
   
 
    // create a renderResult function to display the question obj 
@@ -21,11 +34,13 @@ const Result =  () =>{
       
         const selected = userAnswer[currentQuestion];
 
+        const valAns = questionAnswer[currentQuestion]
+
       // assign the user selected value in the Answer for the currentQuestion 
         const Answer = selected?.isSelected;
         
       // assign the isCorrectAnswer to the Answer value only the answer keyword is relevant to that
-        const isCorrectAnswer = Answer === question?.answer;
+        const isCorrectAnswer = Answer === valAns?.answer;
     
       return(
             <>
@@ -35,11 +50,11 @@ const Result =  () =>{
             <div className="res-container">
             <h3 className="head">Quiz Result</h3>
             <div>
-              <h4>{question?.id}. {question?.question}</h4>
+              <h4>{valAns?.id}. {valAns?.question}</h4>
               <ul>
-                {question?.options.map((option, optionIndex) => (
+                {valAns?.options.map((option, optionIndex) => (
                   <li key={optionIndex}>
-                    <label style={{ color: question.answer === option ? 'green' : Answer === option ? 'red' : 'black' }}>
+                    <label style={{ color: valAns.answer === option ? 'green' : Answer === option ? 'red' : 'black' }}>
                       {option}
                     </label>
                   </li>

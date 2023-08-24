@@ -17,7 +17,7 @@ const Quiz1 = () => {
   const currentQuestion = useSelector((state) => state.question.count);
   const show = useSelector((state) => state.question.showResults);
   const view = useSelector((state) => state.question.viewRes);
-  const Score = useSelector((state) => state.question.quizScore);
+  // const Score = useSelector((state) => state.question.quizScore);
   const dispatch = useDispatch();
 
   
@@ -108,14 +108,29 @@ useEffect(() => {
   let divisor_for_seconds = divisor_for_minutes % 60;
   let seconds = Math.ceil(divisor_for_seconds);
 
-  const handleSendData = async () => {
-    try {
-      const response = await sendDataToBackend(userData);
-      console.log('Data sent successfully:', response);
-    } catch (error) {
-      console.error('Error sending data:', error);
-    }
-  };
+  // const handleSendData = async () => {
+  //   try {
+  //     const response = await sendDataToBackend(userData);
+  //     console.log('Data sent successfully:', response);
+  //   } catch (error) {
+  //     console.error('Error sending data:', error);
+  //   }
+  // };
+
+
+  // const validate = async () => {
+  //   try {
+  //     // Make a POST request to your server with user responses
+  //     const response = await axios.post('http://localhost:8000/api/useranswer', userData);
+
+  //     // Assuming the server responds with the score
+  //     setScore(response.data.score);
+
+  //     console.log("data send success");
+  //   } catch (error) {
+  //     console.error('Error submitting quiz:', error);
+  //   }
+  // };
 
   const validate = () => {
     fetch('http://localhost:8000/api/useranswer', {
@@ -173,7 +188,7 @@ useEffect(() => {
 
           {currentQuestion > 0 && <div type="button" onClick={() => dispatch(decrement())} className='prev'>Previous</div>}
           {currentQuestion < questionsData.length - 1 && <div type="button" onClick={() => dispatch(increment())} className='next'>Next</div>}
-          {currentQuestion === questionsData.length - 1 && <div type="submit" className='submit' onClick={() => {dispatch(userAnswer(userData));handleSubmit(); handleSendData();validate();}}>Submit</div>}
+          {currentQuestion === questionsData.length - 1 && <div type="submit" className='submit' onClick={() => {dispatch(userAnswer(userData));handleSubmit(); validate();}}>Submit</div>}
             </div>
           </div>
           
@@ -201,7 +216,7 @@ useEffect(() => {
     </div>
     ) : (
       <div>
-      {viewRes && (<Result/>)}
+      {viewRes && (<Result userData = {userData}/>)}
     </div>
     )}
     </>
